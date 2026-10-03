@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+
+cc_library(name = "greet", srcs = ["greet.cc"], hdrs = ["greet.h"])
+cc_binary(name = "hello", srcs = ["main.cc"], deps = [":greet"])
+cc_test(name = "greet_test", srcs = ["greet_test.cc"], deps = [":greet"])
+
+# Reports WHERE the action actually ran. Sleeps so cache hits are visible in timing.
+genrule(
+    name = "whereami",
+    outs = ["whereami.txt"],
+    cmd = "sleep 3; (echo host=$$(hostname); uname -sm; echo pwd=$$(pwd); date) > $@",
+)
+
+# Records the inode of an input file as the worker sees it, plus the environment the action ran in.
+genrule(
+    name = "inspect",
+    srcs = ["greet.cc"],
+    outs = ["inspect.txt"],
+    cmd = "(ls -li $(location greet.cc); echo; env | sort; echo; echo pwd=$$(pwd)) > $@; sleep 15",
+)

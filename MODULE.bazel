@@ -1,0 +1,22 @@
+module(name = "hello_rbe")
+bazel_dep(name = "rules_cc", version = "0.2.17")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "toolchains_llvm", version = "1.10.0")
+
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+# A clang that RUNS on linux/aarch64 (the worker), even though Bazel itself runs on macOS.
+llvm.toolchain(
+    name = "llvm_toolchain_linux_exec",
+    llvm_version = "20.1.8",
+    exec_os = "linux",
+    exec_arch = "aarch64",
+)
+use_repo(llvm, "llvm_toolchain_linux_exec")
+
+llvm.toolchain(
+    name = "llvm_toolchain_linux_x86_exec",
+    llvm_version = "20.1.8",
+    exec_os = "linux",
+    exec_arch = "amd64",
+)
+use_repo(llvm, "llvm_toolchain_linux_x86_exec")

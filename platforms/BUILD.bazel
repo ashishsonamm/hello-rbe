@@ -1,0 +1,16 @@
+platform(
+    name = "linux_arm64",
+    # What Bazel uses for toolchain resolution:
+    constraint_values = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+    # What gets sent to NativeLink (part of the action digest; matched by the scheduler):
+    exec_properties = {
+        "OSFamily": "linux",
+        "cpu_arch": "aarch64",
+    },
+)
+
+platform(
+    name = "linux_x86_64",
+    constraint_values = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+    exec_properties = { "OSFamily": "linux", "cpu_arch": "x86_64" },
+)

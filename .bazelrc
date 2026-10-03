@@ -1,0 +1,41 @@
+# Remote cache only: actions still run locally, results are shared.
+build:cache --remote_cache=grpc://localhost:50051
+build:cache --remote_instance_name=main
+
+# Remote execution: actions run on NativeLink workers (this also implies the cache).
+build:remote --remote_executor=grpc://localhost:50051
+build:remote --remote_instance_name=main
+
+# Don't let PATH decide the C++ compiler: auto-config otherwise picked up a GNU gcc.
+common --repo_env=CC=/usr/bin/clang
+# Don't leak the user's shell PATH into actions (it's part of the action digest!)
+build --incompatible_strict_action_env
+
+# Lab 5: cache and execution are DIFFERENT services
+build:split --remote_cache=grpc://localhost:50051
+build:split --remote_executor=grpc://localhost:50052
+build:split --remote_instance_name=main
+# Host (Mac) actions must land on Mac workers. Only applies when the exec platform sets no exec_properties.
+build:split --remote_default_exec_properties=OSFamily=macos
+
+# Lab 6: run on Linux workers, build FOR Linux, with a downloaded (hermetic) clang
+build:linux --config=split
+build:linux --extra_execution_platforms=//platforms:linux_arm64
+build:linux --platforms=//platforms:linux_arm64
+build:linux --extra_toolchains=@llvm_toolchain_linux_exec//:cc-toolchain-aarch64-linux
+
+# ---- Lab 9: company in a box (all endpoints are coder port-forwards on 127.0.0.1) ----
+build:lab9 --remote_executor=grpc://127.0.0.1:50052
+build:lab9 --remote_instance_name=main
+build:lab9 --platforms=//platforms:linux_x86_64
+build:lab9 --extra_execution_platforms=//platforms:linux_x86_64
+build:lab9 --extra_toolchains=@llvm_toolchain_linux_x86_exec//:cc-toolchain-x86_64-linux
+
+# CI: read-write cache
+build:ci --config=lab9
+build:ci --remote_cache=grpc://127.0.0.1:50051
+
+# Developers: read-only AC endpoint, never try to upload results
+build:dev --config=lab9
+build:dev --remote_cache=grpc://127.0.0.1:50053
+build:dev --remote_upload_local_results=false
