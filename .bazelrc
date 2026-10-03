@@ -39,3 +39,6 @@ build:ci --remote_cache=grpc://127.0.0.1:50051
 build:dev --config=lab9
 build:dev --remote_cache=grpc://127.0.0.1:50053
 build:dev --remote_upload_local_results=false
+# Name output dirs after the TARGET platform, not the host CPU (k8 vs darwin_arm64),
+# so Mac and Linux CI produce identical paths => identical action digests.
+build:lab9 --experimental_platform_in_output_dir
